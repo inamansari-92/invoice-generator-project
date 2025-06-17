@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.T Commodities - Invoice Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>A.T COMMODITIES</h1>
+        <p>C-2 WESTLAND TRADE CENTER, SHAHEED E MILLAT ROAD, KARACHI</p>
+        <p>Phone: 021-34381222 | Website: www.atcommodities.pk</p>
+        
+        <h2>Invoice Generator</h2>
+        
+        <form id="invoiceForm">
+            <div class="form-group">
+                <label for="invoice_number">Invoice Number:</label>
+                <input type="text" id="invoice_number" name="invoice_number" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="delivery_date">Delivery Date:</label>
+                <input type="date" id="delivery_date" name="delivery_date" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="vehicle_number">Vehicle Number:</label>
+                <input type="text" id="vehicle_number" name="vehicle_number" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="quantity">Quantity (M/TON):</label>
+                <input type="number" step="0.001" id="quantity" name="quantity" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="unit_price">Unit Price (Rs):</label>
+                <input type="number" step="0.01" id="unit_price" name="unit_price" required>
+            </div>
+            
+            <button type="submit">Generate Invoice</button>
+        </form>
+        
+        <div id="result" class="hidden">
+            <p>Invoice generated successfully!</p>
+            <a id="downloadLink" class="btn">Download Invoice</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('invoiceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                invoice_number: document.getElementById('invoice_number').value,
+                delivery_date: document.getElementById('delivery_date').value,
+                vehicle_number: document.getElementById('vehicle_number').value,
+                quantity: document.getElementById('quantity').value,
+                unit_price: document.getElementById('unit_price').value
+            };
+            
+            try {
+                const response = await fetch('/generate_invoice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const downloadLink = document.getElementById('downloadLink');
+                    downloadLink.href = `/download/${data.filename}`;
+                    downloadLink.download = data.filename;
+                    
+                    document.getElementById('result').classList.remove('hidden');
+                } else {
+                    alert('Error generating invoice');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        });
+    </script>
+</body>
+</html>
